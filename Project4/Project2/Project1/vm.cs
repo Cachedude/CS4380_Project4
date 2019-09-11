@@ -9,17 +9,17 @@ namespace vm
 {
     unsafe class vm
     {
-        static Dictionary<string, int> opCodes = new Dictionary<string, int>();
-        static Dictionary<int, string> reverseOpCodes = new Dictionary<int, string>();
-        static Dictionary<string, int> directives = new Dictionary<string, int>();
+        static Dictionary<string, int> OC = new Dictionary<string, int>();
+        static Dictionary<int, string> ROC = new Dictionary<int, string>();
+        static Dictionary<string, int> DT = new Dictionary<string, int>();
 
         static int PC;
         static int printVariable;
-        static Dictionary<string, int> symbolTable = new Dictionary<string, int>();
-        static Dictionary<int, string> reverseSymbolTable = new Dictionary<int, string>();
-        static Dictionary<string, int> specialRegisters = new Dictionary<string, int>();
+        static Dictionary<string, int> ST = new Dictionary<string, int>();
+        static Dictionary<int, string> RST = new Dictionary<int, string>();
+        static Dictionary<string, int> SR = new Dictionary<string, int>();
         static bool[] Threads = new bool[5];
-        const int MEM_SIZE = 20000;
+        const int MEM_SIZE = 50000;
         const int ThreadStackSize = 1000;
 
         unsafe static void Main(string[] args)
@@ -27,46 +27,46 @@ namespace vm
             try
             {
                 #region Fill OpCodes
-                opCodes.Add("JMP", 1);
-                opCodes.Add("JMR", 2);
-                opCodes.Add("BNZ", 3);
-                opCodes.Add("BGT", 4);
-                opCodes.Add("BLT", 5);
-                opCodes.Add("BRZ", 6);
-                opCodes.Add("MOV", 7);
-                opCodes.Add("LDA", 8);
-                opCodes.Add("STR", 9);
-                opCodes.Add("LDR", 10);
-                opCodes.Add("STB", 11);
-                opCodes.Add("LDB", 12);
-                opCodes.Add("ADD", 13);
-                opCodes.Add("ADI", 14);
-                opCodes.Add("SUB", 15);
-                opCodes.Add("MUL", 16);
-                opCodes.Add("DIV", 17);
-                opCodes.Add("AND", 18);
-                opCodes.Add("OR", 19);
-                opCodes.Add("CMP", 20);
-                opCodes.Add("TRP", 21);
-                opCodes.Add("RUN", 26);
-                opCodes.Add("END", 27);
-                opCodes.Add("BLK", 28);
-                opCodes.Add("LCK", 29);
-                opCodes.Add("ULK", 30);
+                OC.Add("JMP", 1);
+                OC.Add("JMR", 2);
+                OC.Add("BNZ", 3);
+                OC.Add("BGT", 4);
+                OC.Add("BLT", 5);
+                OC.Add("BRZ", 6);
+                OC.Add("MOV", 7);
+                OC.Add("LDA", 8);
+                OC.Add("STR", 9);
+                OC.Add("LDR", 10);
+                OC.Add("STB", 11);
+                OC.Add("LDB", 12);
+                OC.Add("ADD", 13);
+                OC.Add("ADI", 14);
+                OC.Add("SUB", 15);
+                OC.Add("MUL", 16);
+                OC.Add("DIV", 17);
+                OC.Add("AND", 18);
+                OC.Add("OR", 19);
+                OC.Add("CMP", 20);
+                OC.Add("TRP", 21);
+                OC.Add("RUN", 26);
+                OC.Add("END", 27);
+                OC.Add("BLK", 28);
+                OC.Add("LCK", 29);
+                OC.Add("ULK", 30);
 
-                foreach (var item in opCodes)
+                foreach (var item in OC)
                 {
-                    reverseOpCodes.Add(item.Value, item.Key);
+                    ROC.Add(item.Value, item.Key);
                 }
-                reverseOpCodes.Add(22, "STR");
-                reverseOpCodes.Add(23, "LDR");
-                reverseOpCodes.Add(24, "STB");
-                reverseOpCodes.Add(25, "LDB");
+                ROC.Add(22, "STR");
+                ROC.Add(23, "LDR");
+                ROC.Add(24, "STB");
+                ROC.Add(25, "LDB");
                 #endregion
 
                 #region Fill Directives
-                directives.Add(".INT", 4);
-                directives.Add(".BYT", 1);
+                DT.Add(".INT", 4);
+                DT.Add(".BYT", 1);
                 #endregion
 
                 #region Load Threads
@@ -78,11 +78,11 @@ namespace vm
                 #endregion
 
                 #region Fill Special Registers
-                specialRegisters.Add("PC", 8);
-                specialRegisters.Add("SP", 9);
-                specialRegisters.Add("FP", 10);
-                specialRegisters.Add("SL", 11);
-                specialRegisters.Add("SB", 12);
+                SR.Add("PC", 8);
+                SR.Add("SP", 9);
+                SR.Add("FP", 10);
+                SR.Add("SL", 11);
+                SR.Add("SB", 12);
                 #endregion
 
                 bool debug = false;
@@ -100,7 +100,7 @@ namespace vm
                 int currentThreadID = 0;
                 bool contextSwitch = false;
                 bool startProgram = false;
-                int[] Registers = new int[8 + specialRegisters.Count];
+                int[] RT = new int[8 + SR.Count];
                 #region Load Symbol Table
                 StreamReader sr = File.OpenText(args[0]);
                 while ((input = sr.ReadLine()) != null)
@@ -121,12 +121,12 @@ namespace vm
                             }
                             else if (counter == 0)
                             {
-                                if (opCodes.ContainsKey(word))
+                                if (OC.ContainsKey(word))
                                 {
                                     opCode = word;
                                     counter++;
                                 }
-                                else if (directives.ContainsKey(word))
+                                else if (DT.ContainsKey(word))
                                 {
                                     opCode = word;
                                     counter++;
@@ -154,12 +154,12 @@ namespace vm
                             }
                             else if (counter == 0)
                             {
-                                if (opCodes.ContainsKey(word))
+                                if (OC.ContainsKey(word))
                                 {
                                     opCode = word;
                                     counter++;
                                 }
-                                else if (directives.ContainsKey(word))
+                                else if (DT.ContainsKey(word))
                                 {
                                     opCode = word;
                                     counter++;
@@ -186,25 +186,25 @@ namespace vm
                             }
                         }
                     }
-                    if (opCode != null && opCodes.ContainsKey(opCode))
+                    if (opCode != null && OC.ContainsKey(opCode))
                     {
                         if (!startProgram)
                         {
                             PC = locationCounter;
                             startProgram = true;
                         }
-                        if (label != null && !symbolTable.ContainsKey(label))
+                        if (label != null && !ST.ContainsKey(label))
                         {
-                            symbolTable.Add(label, locationCounter);
+                            ST.Add(label, locationCounter);
                         }
                         //locationCounter += 12;
                         locationCounter += 12;
                     }
-                    else if (opCode != null && directives.ContainsKey(opCode))
+                    else if (opCode != null && DT.ContainsKey(opCode))
                     {
-                        if (label != null && !symbolTable.ContainsKey(label))
+                        if (label != null && !ST.ContainsKey(label))
                         {
-                            symbolTable.Add(label, locationCounter);
+                            ST.Add(label, locationCounter);
                         }
                         //locationCounter += directives[opCode];
                         if (opCode == ".BYT")
@@ -217,19 +217,19 @@ namespace vm
                         }
                     }
                 }
-                Registers[specialRegisters["SL"]] = locationCounter;
-                Registers[specialRegisters["SB"]] = MEM_SIZE;
-                Registers[specialRegisters["SP"]] = MEM_SIZE;
-                foreach (var item in symbolTable)
+                RT[SR["SL"]] = locationCounter;
+                RT[SR["SB"]] = MEM_SIZE - 56;
+                RT[SR["SP"]] = MEM_SIZE - 56;
+                foreach (var item in ST)
                 {
-                    reverseSymbolTable.Add(item.Value, item.Key);
+                    RST.Add(item.Value, item.Key);
                 }
                 sr.Close();
 
                 if (debug)
                 {
                     Console.WriteLine("Symbol Table:");
-                    foreach (var value in symbolTable)
+                    foreach (var value in ST)
                     {
                         Console.WriteLine("{0}->{1}", value.Key, value.Value);
                     }
@@ -237,304 +237,316 @@ namespace vm
                 #endregion
 
                 #region Load Byte Code
-                printVariable = PC;
+                int cError = 0;
                 byte* mem = stackalloc byte[MEM_SIZE];
                 byte* newP2 = &mem[PC];
                 int currValue = 0;
-                sr = File.OpenText(args[0]);
-                while ((input = sr.ReadLine()) != null)
+                try
                 {
-                    counter = 0;
-                    opCode = null;
-                    label = null;
-                    op1 = null;
-                    op2 = null;
-                    var words = input.Trim().Split().Select(x => x.Trim(' '));
-                    if (words.Count() == 2)
+                    printVariable = PC;
+                    sr = File.OpenText(args[0]);
+                    while ((input = sr.ReadLine()) != null)
                     {
-                        foreach (var word in words)
+                        cError++;
+                        if (cError == 279)
+                        { }
+                        counter = 0;
+                        opCode = null;
+                        label = null;
+                        op1 = null;
+                        op2 = null;
+                        var words = input.Trim().Split().Select(x => x.Trim(' '));
+                        if (words.Count() == 2)
                         {
-                            if (word == string.Empty || (word[0] == '\\' && word[1] == '\\') || (word[0] == '/' && word[1] == '/'))
+                            foreach (var word in words)
                             {
-                                break;
-                            }
-                            else if (counter == 0)
-                            {
-                                if (opCodes.ContainsKey(word))
+                                if (word == string.Empty || (word[0] == '\\' && word[1] == '\\') || (word[0] == '/' && word[1] == '/'))
                                 {
-                                    label = word;
-                                    opCode = word;
-                                    counter++;
+                                    break;
                                 }
-                                else if (directives.ContainsKey(word))
+                                else if (counter == 0)
                                 {
-                                    opCode = word;
-                                    counter++;
+                                    if (OC.ContainsKey(word))
+                                    {
+                                        label = word;
+                                        opCode = word;
+                                        counter++;
+                                    }
+                                    else if (DT.ContainsKey(word))
+                                    {
+                                        opCode = word;
+                                        counter++;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                op1 = word;
-                                op2 = null;
-                                counter = 0;
+                                else
+                                {
+                                    op1 = word;
+                                    op2 = null;
+                                    counter = 0;
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        foreach (var word in words)
+                        else
                         {
-                            if (word == string.Empty || (word[0] == '\\' && word[1] == '\\') || (word[0] == '/' && word[1] == '/'))
+                            foreach (var word in words)
                             {
-                                break;
-                            }
-                            else if (counter == 0)
-                            {
-                                if (opCodes.ContainsKey(word))
+                                if (word == string.Empty || (word[0] == '\\' && word[1] == '\\') || (word[0] == '/' && word[1] == '/'))
                                 {
-                                    opCode = word;
-                                    counter++;
+                                    break;
                                 }
-                                else if (directives.ContainsKey(word))
+                                else if (counter == 0)
                                 {
-                                    opCode = word;
+                                    if (OC.ContainsKey(word))
+                                    {
+                                        opCode = word;
+                                        counter++;
+                                    }
+                                    else if (DT.ContainsKey(word))
+                                    {
+                                        opCode = word;
+                                        counter++;
+                                    }
+                                    else
+                                    {
+                                        label = word;
+                                    }
+                                }
+                                else if (counter == 1)
+                                {
+                                    if (OC.ContainsKey(opCode) && !int.TryParse(word, out int value))
+                                    {
+                                        label = word;
+                                    }
+                                    op1 = word;
+                                    op2 = null;
                                     counter++;
                                 }
                                 else
                                 {
-                                    label = word;
+                                    op2 = word;
+                                    counter = 0;
                                 }
                             }
-                            else if (counter == 1)
+                        }
+                        if (opCode != null && OC.ContainsKey(opCode))
+                        {
+                            if ((opCode == "LDR" || opCode == "STR" || opCode == "STB" || opCode == "LDB") && ((op2.Length == 2 && op2[0] == 'R') || SR.ContainsKey(op2)))
                             {
-                                if (opCodes.ContainsKey(opCode) && !int.TryParse(word, out int value))
+                                if (opCode == "STR")
                                 {
-                                    label = word;
+                                    int value = 22;
+                                    byte[] array = BitConverter.GetBytes(value);
+                                    foreach (var bit in array)
+                                    {
+                                        *newP2 = bit;
+                                        newP2++;
+                                    }
                                 }
-                                op1 = word;
-                                op2 = null;
-                                counter++;
+                                else if (opCode == "LDR")
+                                {
+                                    int value = 23;
+                                    byte[] array = BitConverter.GetBytes(value);
+                                    foreach (var bit in array)
+                                    {
+                                        *newP2 = bit;
+                                        newP2++;
+                                    }
+                                }
+                                else if (opCode == "STB")
+                                {
+                                    int value = 24;
+                                    byte[] array = BitConverter.GetBytes(value);
+                                    foreach (var bit in array)
+                                    {
+                                        *newP2 = bit;
+                                        newP2++;
+                                    }
+                                }
+                                else if (opCode == "LDB")
+                                {
+                                    int value = 25;
+                                    byte[] array = BitConverter.GetBytes(value);
+                                    foreach (var bit in array)
+                                    {
+                                        *newP2 = bit;
+                                        newP2++;
+                                    }
+                                }
                             }
                             else
                             {
-                                op2 = word;
-                                counter = 0;
+                                int value = OC[opCode];
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                            }
+                            //newP2 += 4;
+                            //newP2++;
+                            if (op1 == null)
+                            {
+                                newP2 += 4;
+                                //newP2++;
+                            }
+                            else if (op1.Length == 2 && op1[0] == 'R')
+                            {
+                                int value = int.Parse(op1[1].ToString());
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                            else if (SR.ContainsKey(op1))
+                            {
+                                byte[] array = BitConverter.GetBytes(SR[op1]);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                            }
+                            else if (ST.ContainsKey(op1))
+                            {
+                                int value = ST[op1];
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                            else
+                            {
+                                int value = int.Parse(op1);
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                            if (op2 == null)
+                            {
+                                newP2 += 4;
+                                //newP2++;
+                            }
+                            else if (op2.Length == 2 && op2[0] == 'R')
+                            {
+                                int value = int.Parse(op2[1].ToString());
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                            else if (SR.ContainsKey(op2))
+                            {
+                                byte[] array = BitConverter.GetBytes(SR[op2]);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                            }
+                            else if (ST.ContainsKey(op2))
+                            {
+                                int value = ST[op2];
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                            else
+                            {
+                                int value = int.Parse(op2);
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP2 = bit;
+                                    newP2++;
+                                }
+                                //newP2++;
+                            }
+                        }
+                        else if (opCode != null && DT.ContainsKey(opCode))
+                        {
+                            byte* newP;
+                            if (label != null)
+                            {
+                                if (!ST.ContainsKey(label))
+                                {
+                                    Console.WriteLine("Label Not Added To Symbol Table.");
+                                    break;
+                                }
+                                currValue = ST[label];
+                            }
+                            else
+                            {
+                                if (opCode == ".BYT")
+                                {
+                                    currValue += 1;
+                                }
+                                else
+                                {
+                                    currValue += 4;
+                                }
+                            }
+                            newP = &mem[currValue];
+                            if (opCode == ".INT")
+                            {
+                                int value = Convert.ToInt32(op1);
+                                byte[] array = BitConverter.GetBytes(value);
+                                foreach (var bit in array)
+                                {
+                                    *newP = bit;
+                                    newP++;
+                                }
+                            }
+                            else
+                            {
+                                char[] c = op1.ToCharArray();
+                                if (c.Length > 1)
+                                {
+                                    var array = BitConverter.GetBytes(c[1]);
+                                    *newP = array[0];
+                                }
+                                else
+                                {
+                                    var array = BitConverter.GetBytes(c[0]);
+                                    *newP = array[0];
+                                }
                             }
                         }
                     }
-                    if (opCode != null && opCodes.ContainsKey(opCode))
+                    sr.Close();
+                    if (debug)
                     {
-                        if ((opCode == "LDR" || opCode == "STR" || opCode == "STB" || opCode == "LDB") && ((op2.Length == 2 && op2[0] == 'R') || specialRegisters.ContainsKey(op2)))
+                        byte* p = mem;
+                        Console.WriteLine("\n\nByte Table:");
+                        for (int i = 0; i < printVariable; i++)
                         {
-                            if (opCode == "STR")
-                            {
-                                int value = 22;
-                                byte[] array = BitConverter.GetBytes(value);
-                                foreach (var bit in array)
-                                {
-                                    *newP2 = bit;
-                                    newP2++;
-                                }
-                            }
-                            else if (opCode == "LDR")
-                            {
-                                int value = 23;
-                                byte[] array = BitConverter.GetBytes(value);
-                                foreach (var bit in array)
-                                {
-                                    *newP2 = bit;
-                                    newP2++;
-                                }
-                            }
-                            else if (opCode == "STB")
-                            {
-                                int value = 24;
-                                byte[] array = BitConverter.GetBytes(value);
-                                foreach (var bit in array)
-                                {
-                                    *newP2 = bit;
-                                    newP2++;
-                                }
-                            }
-                            else if (opCode == "LDB")
-                            {
-                                int value = 25;
-                                byte[] array = BitConverter.GetBytes(value);
-                                foreach (var bit in array)
-                                {
-                                    *newP2 = bit;
-                                    newP2++;
-                                }
-                            }
+                            Console.WriteLine("{0}: {1}", i, *p);
+                            p++;
                         }
-                        else
-                        {
-                            int value = opCodes[opCode];
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                        }
-                        //newP2 += 4;
-                        //newP2++;
-                        if (op1 == null)
-                        {
-                            newP2 += 4;
-                            //newP2++;
-                        }
-                        else if (op1.Length == 2 && op1[0] == 'R')
-                        {
-                            int value = int.Parse(op1[1].ToString());
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                        else if (specialRegisters.ContainsKey(op1))
-                        {
-                            byte[] array = BitConverter.GetBytes(specialRegisters[op1]);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                        }
-                        else if (symbolTable.ContainsKey(op1))
-                        {
-                            int value = symbolTable[op1];
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                        else
-                        {
-                            int value = int.Parse(op1);
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                        if (op2 == null)
-                        {
-                            newP2 += 4;
-                            //newP2++;
-                        }
-                        else if (op2.Length == 2 && op2[0] == 'R')
-                        {
-                            int value = int.Parse(op2[1].ToString());
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                        else if (specialRegisters.ContainsKey(op2))
-                        {
-                            byte[] array = BitConverter.GetBytes(specialRegisters[op2]);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                        }
-                        else if (symbolTable.ContainsKey(op2))
-                        {
-                            int value = symbolTable[op2];
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                        else
-                        {
-                            int value = int.Parse(op2);
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP2 = bit;
-                                newP2++;
-                            }
-                            //newP2++;
-                        }
-                    }
-                    else if (opCode != null && directives.ContainsKey(opCode))
-                    {
-                        byte* newP;
-                        if (label != null)
-                        {
-                            if (!symbolTable.ContainsKey(label))
-                            {
-                                Console.WriteLine("Label Not Added To Symbol Table.");
-                                break;
-                            }
-                            currValue = symbolTable[label];
-                        }
-                        else
-                        {
-                            if (opCode == ".BYT")
-                            {
-                                currValue += 1;
-                            }
-                            else
-                            {
-                                currValue += 4;
-                            }
-                        }
-                        newP = &mem[currValue];
-                        if (opCode == ".INT")
-                        {
-                            int value = Convert.ToInt32(op1);
-                            byte[] array = BitConverter.GetBytes(value);
-                            foreach (var bit in array)
-                            {
-                                *newP = bit;
-                                newP++;
-                            }
-                        }
-                        else
-                        {
-                            char[] c = op1.ToCharArray();
-                            if (c.Length > 1)
-                            {
-                                var array = BitConverter.GetBytes(c[1]);
-                                *newP = array[0];
-                            }
-                            else
-                            {
-                                var array = BitConverter.GetBytes(c[0]);
-                                *newP = array[0];
-                            }
-                        }
+                        Console.WriteLine();
                     }
                 }
-                sr.Close();
-                if (debug)
+                catch(Exception ex)
                 {
-                    byte* p = mem;
-                    Console.WriteLine("\n\nByte Table:");
-                    for (int i = 0; i < printVariable; i++)
-                    {
-                        Console.WriteLine("{0}: {1}", i, *p);
-                        p++;
-                    }
-                    Console.WriteLine();
+                    Console.WriteLine("Error Loading Byte Code:\n" + ex.Message + "\n\nError Line: " + cError);
+                    Console.ReadKey();
                 }
                 #endregion
 
@@ -542,17 +554,40 @@ namespace vm
                 byte* currP;
                 int intOp1 = 0;
                 int intOp2 = 0;
-                Registers[specialRegisters["PC"]] = PC;
+                int printValue = 0;
+                RT[SR["PC"]] = PC;
                 int newThreadID = -1;
                 int newThreadPC = -1;
                 int countyer = 0;
                 bool running = true;
+                byte[] printArray = new byte[4];
                 byte[] opArray = new byte[4];
                 byte[] op1Array = new byte[4];
                 byte[] op2Array = new byte[4];
                 while (running)
                 {
-                    PC = Registers[specialRegisters["PC"]];
+                    //byte* p = mem;
+                    //StreamWriter sw = new StreamWriter("CurrentStack.txt");
+                    //sw.WriteLine("\n\nByte Table:");
+                    //for (int i = 0; i < MEM_SIZE; i += 4)
+                    //{
+                    //    if(i == 19940)
+                    //    { }
+                    //    for (int j = 0; j < 4; j++)
+                    //    {
+                    //        printArray[j] = *p;
+                    //        p++;
+                    //    }
+                    //    printValue = BitConverter.ToInt32(printArray, 0);
+                    //    sw.WriteLine("{0}: {1}", i, printValue);
+                    //    //p++;
+                    //}
+                    //sw.WriteLine();
+                    //sw.Close();
+
+                    PC = RT[SR["PC"]];
+                    if(PC == 880)
+                    { }
                     currP = &mem[PC];
                     for (int i = 0; i < 4; i++)
                     {
@@ -560,9 +595,9 @@ namespace vm
                         currP++;
                     }
                     int opCodeInt = BitConverter.ToInt32(opArray, 0);
-                    if (reverseOpCodes.ContainsKey(opCodeInt))
+                    if (ROC.ContainsKey(opCodeInt))
                     {
-                        opCode = reverseOpCodes[opCodeInt];
+                        opCode = ROC[opCodeInt];
                         for (int i = 0; i < 4; i++)
                         {
                             op1Array[i] = *currP;
@@ -575,10 +610,11 @@ namespace vm
                             currP++;
                         }
                         intOp2 = BitConverter.ToInt32(op2Array, 0);
+
                         switch (opCode)
                         {
                             case "JMP":
-                                if (reverseSymbolTable.ContainsKey(intOp1))
+                                if (RST.ContainsKey(intOp1))
                                 {
                                     PC = intOp1 - 12;
                                 }
@@ -591,9 +627,9 @@ namespace vm
                             case "JMR":
                                 break;
                             case "BNZ":
-                                if (Registers[intOp1] != 0)
+                                if (RT[intOp1] != 0)
                                 {
-                                    if (reverseSymbolTable.ContainsKey(intOp2))
+                                    if (RST.ContainsKey(intOp2))
                                     {
                                         PC = intOp2 - 12;
                                     }
@@ -605,9 +641,9 @@ namespace vm
                                 }
                                 break;
                             case "BGT":
-                                if (Registers[intOp1] > 0)
+                                if (RT[intOp1] > 0)
                                 {
-                                    if (reverseSymbolTable.ContainsKey(intOp2))
+                                    if (RST.ContainsKey(intOp2))
                                     {
                                         PC = intOp2 - 12;
                                     }
@@ -619,9 +655,9 @@ namespace vm
                                 }
                                 break;
                             case "BLT":
-                                if (Registers[intOp1] < 0)
+                                if (RT[intOp1] < 0)
                                 {
-                                    if (reverseSymbolTable.ContainsKey(intOp2))
+                                    if (RST.ContainsKey(intOp2))
                                     {
                                         PC = intOp2 - 12;
                                     }
@@ -633,9 +669,9 @@ namespace vm
                                 }
                                 break;
                             case "BRZ":
-                                if (Registers[intOp1] == 0)
+                                if (RT[intOp1] == 0)
                                 {
-                                    if (reverseSymbolTable.ContainsKey(intOp2))
+                                    if (RST.ContainsKey(intOp2))
                                     {
                                         PC = intOp2 - 12;
                                     }
@@ -647,12 +683,16 @@ namespace vm
                                 }
                                 break;
                             case "MOV":
-                                Registers[intOp1] = Registers[intOp2];
+                                RT[intOp1] = RT[intOp2];
+                                if(intOp1 == 8)
+                                {
+                                    PC = RT[intOp1];
+                                }
                                 break;
                             case "LDA":
-                                if (reverseSymbolTable.ContainsKey(intOp2))
+                                if (RST.ContainsKey(intOp2))
                                 {
-                                    Registers[intOp1] = intOp2;
+                                    RT[intOp1] = intOp2;
                                 }
                                 else
                                 {
@@ -664,21 +704,21 @@ namespace vm
                                 if (opCodeInt == 22)
                                 {
                                     int length = 4;
-                                    byte[] bty = BitConverter.GetBytes(Registers[intOp1]);
+                                    byte[] bty = BitConverter.GetBytes(RT[intOp1]);
                                     if (bty.Length == 2)
                                     {
                                         length = 1;
                                     }
                                     for (int i = 0; i < length; i++)
                                     {
-                                        mem[Registers[intOp2] + i] = bty[i];
+                                        mem[RT[intOp2] + i] = bty[i];
                                     }
                                     bty = null;
                                 }
                                 else
                                 {
                                     int length = 4;
-                                    byte[] bty = BitConverter.GetBytes(Registers[intOp1]);
+                                    byte[] bty = BitConverter.GetBytes(RT[intOp1]);
                                     if (bty.Length == 2)
                                     {
                                         length = 1;
@@ -693,66 +733,64 @@ namespace vm
                             case "LDR":
                                 if (opCodeInt == 23)
                                 {
-                                    byte[] bty = { mem[Registers[intOp2]], mem[Registers[intOp2] + 1],
-                                    mem[Registers[intOp2] + 2], mem[Registers[intOp2] + 3] };
-                                    Registers[intOp1] = BitConverter.ToInt32(bty, 0);
+                                    byte[] bty = { mem[RT[intOp2]], mem[RT[intOp2] + 1],
+                                    mem[RT[intOp2] + 2], mem[RT[intOp2] + 3] };
+                                    RT[intOp1] = BitConverter.ToInt32(bty, 0);
                                     if (intOp1 == 8)
                                     {
-                                        PC = Registers[intOp1];
+                                        PC = RT[intOp1];
                                     }
                                     bty = null;
                                 }
                                 else
                                 {
                                     byte[] bty = { mem[intOp2], mem[intOp2 + 1], mem[intOp2 + 2], mem[intOp2 + 3] };
-                                    Registers[intOp1] = BitConverter.ToInt32(bty, 0);
+                                    RT[intOp1] = BitConverter.ToInt32(bty, 0);
                                     bty = null;
                                 }
                                 break;
                             case "STB":
                                 if (opCodeInt == 24)
                                 {
-                                    byte[] stb = BitConverter.GetBytes(Registers[intOp1]);
-                                    mem[Registers[intOp2]] = stb[0];
+                                    byte[] stb = BitConverter.GetBytes(RT[intOp1]);
+                                    mem[RT[intOp2]] = stb[0];
                                     stb = null;
                                 }
                                 else
                                 {
-                                    byte[] stb = BitConverter.GetBytes(Registers[intOp1]);
+                                    byte[] stb = BitConverter.GetBytes(RT[intOp1]);
                                     mem[intOp2] = stb[0];
                                     stb = null;
                                 }
                                 break;
                             case "LDB":
-                                if (intOp1 == 3 && intOp2 == 161)
-                                { }
                                 if (opCodeInt == 25)
                                 {
-                                    byte[] ldb = BitConverter.GetBytes(mem[Registers[intOp2]]);
-                                    Registers[intOp1] = ldb[0];
+                                    byte[] ldb = BitConverter.GetBytes(mem[RT[intOp2]]);
+                                    RT[intOp1] = ldb[0];
                                     ldb = null;
                                 }
                                 else
                                 {
                                     byte[] ldb = BitConverter.GetBytes(mem[intOp2]);
-                                    Registers[intOp1] = ldb[0];
+                                    RT[intOp1] = ldb[0];
                                     ldb = null;
                                 }
                                 break;
                             case "ADD":
-                                Registers[intOp1] += Registers[intOp2];
+                                RT[intOp1] += RT[intOp2];
                                 break;
                             case "ADI":
-                                Registers[intOp1] += intOp2;
+                                RT[intOp1] += intOp2;
                                 break;
                             case "SUB":
-                                Registers[intOp1] -= Registers[intOp2];
+                                RT[intOp1] -= RT[intOp2];
                                 break;
                             case "MUL":
-                                Registers[intOp1] *= Registers[intOp2];
+                                RT[intOp1] *= RT[intOp2];
                                 break;
                             case "DIV":
-                                Registers[intOp1] /= Registers[intOp2];
+                                RT[intOp1] /= RT[intOp2];
                                 break;
                             case "AND":
                                 break;
@@ -764,7 +802,7 @@ namespace vm
                                 {
                                     if (!Threads[i])
                                     {
-                                        Registers[intOp1] = i;
+                                        RT[intOp1] = i;
                                         Threads[i] = true;
                                         found = true;
                                         contextSwitch = true;
@@ -835,17 +873,17 @@ namespace vm
                                 umbty = null;
                                 break;
                             case "CMP":
-                                if (Registers[intOp1] == Registers[intOp2])
+                                if (RT[intOp1] == RT[intOp2])
                                 {
-                                    Registers[intOp1] = 0;
+                                    RT[intOp1] = 0;
                                 }
-                                else if (Registers[intOp1] > Registers[intOp2])
+                                else if (RT[intOp1] > RT[intOp2])
                                 {
-                                    Registers[intOp1] = 1;
+                                    RT[intOp1] = 1;
                                 }
-                                else if (Registers[intOp1] < Registers[intOp2])
+                                else if (RT[intOp1] < RT[intOp2])
                                 {
-                                    Registers[intOp1] = -1;
+                                    RT[intOp1] = -1;
                                 }
                                 break;
                             case "TRP":
@@ -855,13 +893,13 @@ namespace vm
                                         running = false;
                                         break;
                                     case 1:
-                                        Console.Write("{0}", (int)Registers[3]);
+                                        Console.Write("{0}", (int)RT[3]);
                                         break;
                                     case 2:
-                                        Registers[3] = int.Parse(Console.ReadLine());
+                                        RT[3] = int.Parse(Console.ReadLine());
                                         break;
                                     case 3:
-                                        char c = (char)Registers[3];
+                                        char c = (char)RT[3];
                                         if (c == '~')
                                         {
                                             Console.WriteLine();
@@ -877,30 +915,22 @@ namespace vm
                                         break;
                                     case 4:
                                         var value = Console.ReadKey();
-                                        Registers[3] = value.KeyChar;
+                                        RT[3] = value.KeyChar;
                                         break;
                                     case 100:
-                                        if (Registers[0] == 144)
-                                        {
-                                            countyer = 0;
-                                        }
-                                        else
-                                        {
-                                            countyer++;
-                                        }
                                         break;
                                 }
                                 break;
                         }
                     }
                     PC += 12;
-                    Registers[specialRegisters["PC"]] = PC;
-                    if (Registers[specialRegisters["SP"]] < Registers[specialRegisters["SL"]])
+                    RT[SR["PC"]] = PC;
+                    if (RT[SR["SP"]] < RT[SR["SL"]])
                     {
                         Console.WriteLine("Stack Overflow Occured!!!");
                         break;
                     }
-                    if (Registers[specialRegisters["SP"]] > Registers[specialRegisters["SB"]])
+                    if (RT[SR["SP"]] > RT[SR["SB"]])
                     {
                         Console.WriteLine("Stack Underflow Occured!!!");
                         break;
@@ -1006,10 +1036,10 @@ namespace vm
                         if (currentThreadID != oldThreadID)
                         {
                             int threadSB = MEM_SIZE - (oldThreadID * ThreadStackSize);
-                            for (int i = 0; i < Registers.Length; i++)
+                            for (int i = 0; i < RT.Length; i++)
                             {
                                 int memLocation = 0;
-                                if (i == specialRegisters["PC"])
+                                if (i == SR["PC"])
                                 {
                                     memLocation = threadSB - 4;
                                 }
@@ -1045,16 +1075,24 @@ namespace vm
                                 {
                                     memLocation = threadSB - 36;
                                 }
-                                else if (i == specialRegisters["SP"])
+                                else if (i == SR["SP"])
                                 {
                                     memLocation = threadSB - 40;
                                 }
-                                else if (i == specialRegisters["FP"])
+                                else if (i == SR["FP"])
                                 {
                                     memLocation = threadSB - 44;
                                 }
+                                else if (i == SR["SL"])
+                                {
+                                    memLocation = threadSB - 48;
+                                }
+                                else if (i == SR["SB"])
+                                {
+                                    memLocation = threadSB - 52;
+                                }
                                 int length = 4;
-                                byte[] bty = BitConverter.GetBytes(Registers[i]);
+                                byte[] bty = BitConverter.GetBytes(RT[i]);
                                 if (bty.Length == 2)
                                 {
                                     length = 1;
@@ -1069,67 +1107,77 @@ namespace vm
                             if (currentThreadID == newThreadID)
                             {
                                 newThreadID = -1;
-                                Registers[specialRegisters["PC"]] = newThreadPC;
+                                RT[SR["PC"]] = newThreadPC;
                                 PC = newThreadPC;
                                 newThreadPC = -1;
-                                Registers[specialRegisters["SP"]] = threadSB;
-                                Registers[specialRegisters["FP"]] = threadSB;
-                                Registers[0] = 0;
-                                Registers[1] = 0;
-                                Registers[2] = 0;
-                                Registers[3] = 0;
-                                Registers[4] = 0;
-                                Registers[5] = 0;
-                                Registers[6] = 0;
-                                Registers[7] = 0;
+                                RT[SR["SP"]] = threadSB - 56;
+                                RT[SR["FP"]] = threadSB - 56;
+                                RT[SR["SL"]] = threadSB - ThreadStackSize;
+                                RT[SR["SB"]] = threadSB;
+                                RT[0] = 0;
+                                RT[1] = 0;
+                                RT[2] = 0;
+                                RT[3] = 0;
+                                RT[4] = 0;
+                                RT[5] = 0;
+                                RT[6] = 0;
+                                RT[7] = 0;
                             }
                             else
                             {
                                 threadSB -= 4; // PC
                                 byte[] pcbty = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[specialRegisters["PC"]] = BitConverter.ToInt32(pcbty, 0);
-                                PC = Registers[specialRegisters["PC"]];
+                                RT[SR["PC"]] = BitConverter.ToInt32(pcbty, 0);
+                                PC = RT[SR["PC"]];
                                 threadSB -= 4; // 0
                                 pcbty = null;
                                 byte[] bty0 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[0] = BitConverter.ToInt32(bty0, 0);
+                                RT[0] = BitConverter.ToInt32(bty0, 0);
                                 bty0 = null;
                                 threadSB -= 4; // 1
                                 byte[] bty1 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[1] = BitConverter.ToInt32(bty1, 0);
+                                RT[1] = BitConverter.ToInt32(bty1, 0);
                                 bty1 = null;
                                 threadSB -= 4; // 2
                                 byte[] bty2 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[2] = BitConverter.ToInt32(bty2, 0);
+                                RT[2] = BitConverter.ToInt32(bty2, 0);
                                 bty2 = null;
                                 threadSB -= 4; // 3
                                 byte[] bty3 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[3] = BitConverter.ToInt32(bty3, 0);
+                                RT[3] = BitConverter.ToInt32(bty3, 0);
                                 bty3 = null;
                                 threadSB -= 4; // 4
                                 byte[] bty4 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[4] = BitConverter.ToInt32(bty4, 0);
+                                RT[4] = BitConverter.ToInt32(bty4, 0);
                                 bty4 = null;
                                 threadSB -= 4; // 5
                                 byte[] bty5 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[5] = BitConverter.ToInt32(bty5, 0);
+                                RT[5] = BitConverter.ToInt32(bty5, 0);
                                 bty5 = null;
                                 threadSB -= 4; // 6
                                 byte[] bty6 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[6] = BitConverter.ToInt32(bty6, 0);
+                                RT[6] = BitConverter.ToInt32(bty6, 0);
                                 bty6 = null;
                                 threadSB -= 4; // 7
                                 byte[] bty7 = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[7] = BitConverter.ToInt32(bty7, 0);
+                                RT[7] = BitConverter.ToInt32(bty7, 0);
                                 bty7 = null;
                                 threadSB -= 4; // SP
                                 byte[] btysp = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[specialRegisters["SP"]] = BitConverter.ToInt32(btysp, 0);
+                                RT[SR["SP"]] = BitConverter.ToInt32(btysp, 0);
                                 btysp = null;
                                 threadSB -= 4; // FP
                                 byte[] btyfp = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
-                                Registers[specialRegisters["FP"]] = BitConverter.ToInt32(btyfp, 0);
+                                RT[SR["FP"]] = BitConverter.ToInt32(btyfp, 0);
                                 btyfp = null;
+                                threadSB -= 4; // SL
+                                byte[] btysl = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
+                                RT[SR["SL"]] = BitConverter.ToInt32(btysl, 0);
+                                btysl = null;
+                                threadSB -= 4; // SL
+                                byte[] btysb = { mem[threadSB], mem[threadSB + 1], mem[threadSB + 2], mem[threadSB + 3] };
+                                RT[SR["SB"]] = BitConverter.ToInt32(btysb, 0);
+                                btysb = null;
                             }
                         }
                         bool cont = false;

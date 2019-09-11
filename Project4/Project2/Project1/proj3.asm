@@ -1,13 +1,45 @@
-﻿SIZE .INT 7
-cnt .INT 0
-tenth .INT 0
-C .BYT
-data .INT
-flag .INT
-opdv .INT
-opd 
-reset
-STR R0 PC
-main LDR R0 PC
-ADI R0 4
-JMP reset
+﻿H .BYT 'H'
+e .BYT 'e'
+l .BYT 'l'
+o .BYT 'o'
+space .BYT 32
+W .BYT 'W'
+r .BYT 'r'
+d .BYT 'd'
+mutex .INT    -1
+MAIN LCK     mutex
+RUN R3  THREAD
+TRP 1
+RUN R3  THREAD
+TRP 1
+RUN R3  THREAD
+TRP 1
+RUN R3  THREAD
+TRP 1
+ULK mutex
+BLK
+TRP 0
+THREAD LCK mutex
+ULK mutex
+LDB R3  H
+TRP 3
+LDB R3  e
+TRP 3
+LDB R3  l
+TRP 3
+TRP 3
+LDB R3  o
+TRP 3
+LCK mutex
+LDB R3  W
+TRP 3
+LDB R3  o
+TRP 3
+LDB R3  r
+TRP 3
+LDB R3  l
+TRP 3
+LDB R3  d
+TRP 3
+ULK mutex
+END
