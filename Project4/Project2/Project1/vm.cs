@@ -19,7 +19,7 @@ namespace vm
         static Dictionary<int, string> RST = new Dictionary<int, string>();
         static Dictionary<string, int> SR = new Dictionary<string, int>();
         static bool[] Threads = new bool[5];
-        const int MEM_SIZE = 50000;
+        const int MEM_SIZE = 100000;
         const int ThreadStackSize = 1000;
 
         unsafe static void Main(string[] args)
@@ -217,9 +217,9 @@ namespace vm
                         }
                     }
                 }
-                RT[SR["SL"]] = locationCounter;
-                RT[SR["SB"]] = MEM_SIZE - 56;
-                RT[SR["SP"]] = MEM_SIZE - 56;
+                RT[SR["SL"]] = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(locationCounter) - 12) / 4) * 4);
+                RT[SR["SB"]] = MEM_SIZE - 8;
+                RT[SR["SP"]] = MEM_SIZE - 8;
                 foreach (var item in ST)
                 {
                     RST.Add(item.Value, item.Key);
@@ -248,7 +248,7 @@ namespace vm
                     while ((input = sr.ReadLine()) != null)
                     {
                         cError++;
-                        if (cError == 279)
+                        if (cError == 205)
                         { }
                         counter = 0;
                         opCode = null;
@@ -566,24 +566,24 @@ namespace vm
                 byte[] op2Array = new byte[4];
                 while (running)
                 {
-                    //byte* p = mem;
-                    //StreamWriter sw = new StreamWriter("CurrentStack.txt");
-                    //sw.WriteLine("\n\nByte Table:");
-                    //for (int i = 0; i < MEM_SIZE; i += 4)
-                    //{
-                    //    if(i == 19940)
-                    //    { }
-                    //    for (int j = 0; j < 4; j++)
-                    //    {
-                    //        printArray[j] = *p;
-                    //        p++;
-                    //    }
-                    //    printValue = BitConverter.ToInt32(printArray, 0);
-                    //    sw.WriteLine("{0}: {1}", i, printValue);
-                    //    //p++;
-                    //}
-                    //sw.WriteLine();
-                    //sw.Close();
+                    byte* p = mem;
+                    StreamWriter sw1 = new StreamWriter("CurrentStack.txt");
+                    sw1.WriteLine("\n\nByte Table:");
+                    for (int i = 0; i < MEM_SIZE; i += 4)
+                    {
+                        if (i == 19940)
+                        { }
+                        for (int j = 0; j < 4; j++)
+                        {
+                            printArray[j] = *p;
+                            p++;
+                        }
+                        printValue = BitConverter.ToInt32(printArray, 0);
+                        sw1.WriteLine("{0}: {1}", i, printValue);
+                        //p++;
+                    }
+                    sw1.WriteLine();
+                    sw1.Close();
 
                     PC = RT[SR["PC"]];
                     if(PC == 880)
@@ -619,7 +619,7 @@ namespace vm
                                     PC = intOp1 - 12;
                                 }
                                 else
-                                {
+                                { 
                                     Console.WriteLine("There is no label in location: " + intOp1 + ".");
                                     running = false;
                                 }
@@ -1196,6 +1196,24 @@ namespace vm
                 }
                 #endregion
 
+                byte* p2 = mem;
+                StreamWriter sw = new StreamWriter("CurrentStack.txt");
+                sw.WriteLine("\n\nByte Table:");
+                for (int i = 0; i < MEM_SIZE; i += 4)
+                {
+                    if (i == 19940)
+                    { }
+                    for (int j = 0; j < 4; j++)
+                    {
+                        printArray[j] = *p2;
+                        p2++;
+                    }
+                    printValue = BitConverter.ToInt32(printArray, 0);
+                    sw.WriteLine("{0}: {1}", i, printValue);
+                    //p++;
+                }
+                sw.WriteLine();
+                sw.Close();
                 //if (debug)
                 //{
                 //    byte* p = mem;
