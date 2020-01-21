@@ -24,6 +24,7 @@ namespace vm
 
         unsafe static void Main(string[] args)
         {
+            bool debug = false;
             try
             {
                 #region Fill OpCodes
@@ -85,7 +86,6 @@ namespace vm
                 SR.Add("SB", 12);
                 #endregion
 
-                bool debug = false;
                 if (args.Length > 1)
                 {
                     debug = true;
@@ -217,7 +217,7 @@ namespace vm
                         }
                     }
                 }
-                RT[SR["SL"]] = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(locationCounter) - 12) / 4) * 4);
+                RT[SR["SL"]] = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(locationCounter) - 12) / 4) * 4) + 4;
                 RT[SR["SB"]] = MEM_SIZE - 8;
                 RT[SR["SP"]] = MEM_SIZE - 8;
                 foreach (var item in ST)
@@ -564,26 +564,32 @@ namespace vm
                 byte[] opArray = new byte[4];
                 byte[] op1Array = new byte[4];
                 byte[] op2Array = new byte[4];
+                bool breakPoint = false;
+                int activateBreakPoint = 0;
+                debug = false;
                 while (running)
                 {
-                    byte* p = mem;
-                    StreamWriter sw1 = new StreamWriter("CurrentStack.txt");
-                    sw1.WriteLine("\n\nByte Table:");
-                    for (int i = 0; i < MEM_SIZE; i += 4)
+                    if (debug)
                     {
-                        if (i == 19940)
-                        { }
-                        for (int j = 0; j < 4; j++)
+                        byte* p = mem;
+                        StreamWriter sw1 = new StreamWriter("CurrentStack.txt");
+                        sw1.WriteLine("\n\nByte Table:");
+                        for (int i = 0; i < MEM_SIZE; i += 4)
                         {
-                            printArray[j] = *p;
-                            p++;
+                            if (i == 19940)
+                            { }
+                            for (int j = 0; j < 4; j++)
+                            {
+                                printArray[j] = *p;
+                                p++;
+                            }
+                            printValue = BitConverter.ToInt32(printArray, 0);
+                            sw1.WriteLine("{0}: {1}", i, printValue);
+                            //p++;
                         }
-                        printValue = BitConverter.ToInt32(printArray, 0);
-                        sw1.WriteLine("{0}: {1}", i, printValue);
-                        //p++;
+                        sw1.WriteLine();
+                        sw1.Close();
                     }
-                    sw1.WriteLine();
-                    sw1.Close();
 
                     PC = RT[SR["PC"]];
                     if(PC == 880)
@@ -610,6 +616,21 @@ namespace vm
                             currP++;
                         }
                         intOp2 = BitConverter.ToInt32(op2Array, 0);
+                        if(intOp1 == ST["PROGRAMEND"])
+                        {
+                            //debug = true;
+                        }
+                        if(breakPoint)
+                        {
+                            debug = true;
+                            breakPoint = false;
+                            activateBreakPoint = 1;
+                        }
+                        bool tryThis = false;
+                        if(tryThis)
+                        {
+                            debug = false;
+                        }
 
                         switch (opCode)
                         {
@@ -793,8 +814,24 @@ namespace vm
                                 RT[intOp1] /= RT[intOp2];
                                 break;
                             case "AND":
+                                if(RT[intOp1] == 1 && RT[intOp2] == 1)
+                                {
+                                    RT[intOp1] = 1;
+                                }
+                                else
+                                {
+                                    RT[intOp1] = 0;
+                                }
                                 break;
                             case "OR":
+                                if (RT[intOp1] == 1 || RT[intOp2] == 1)
+                                {
+                                    RT[intOp1] = 1;
+                                }
+                                else
+                                {
+                                    RT[intOp1] = 0;
+                                }
                                 break;
                             case "RUN":
                                 bool found = false;
@@ -914,10 +951,14 @@ namespace vm
                                         }
                                         break;
                                     case 4:
-                                        var value = Console.ReadKey();
-                                        RT[3] = value.KeyChar;
+                                        var value = Console.ReadLine()[0];
+                                        RT[3] = value;
                                         break;
                                     case 100:
+                                        breakPoint = true;
+                                        break;
+                                    default:
+                                        running = false;
                                         break;
                                 }
                                 break;
@@ -1196,24 +1237,24 @@ namespace vm
                 }
                 #endregion
 
-                byte* p2 = mem;
-                StreamWriter sw = new StreamWriter("CurrentStack.txt");
-                sw.WriteLine("\n\nByte Table:");
-                for (int i = 0; i < MEM_SIZE; i += 4)
-                {
-                    if (i == 19940)
-                    { }
-                    for (int j = 0; j < 4; j++)
-                    {
-                        printArray[j] = *p2;
-                        p2++;
-                    }
-                    printValue = BitConverter.ToInt32(printArray, 0);
-                    sw.WriteLine("{0}: {1}", i, printValue);
-                    //p++;
-                }
-                sw.WriteLine();
-                sw.Close();
+                //byte* p2 = mem;
+                //StreamWriter sw = new StreamWriter("CurrentStack.txt");
+                //sw.WriteLine("\n\nByte Table:");
+                //for (int i = 0; i < MEM_SIZE; i += 4)
+                //{
+                //    if (i == 19940)
+                //    { }
+                //    for (int j = 0; j < 4; j++)
+                //    {
+                //        printArray[j] = *p2;
+                //        p2++;
+                //    }
+                //    printValue = BitConverter.ToInt32(printArray, 0);
+                //    sw.WriteLine("{0}: {1}", i, printValue);
+                //    //p++;
+                //}
+                //sw.WriteLine();
+                //sw.Close();
                 //if (debug)
                 //{
                 //    byte* p = mem;
@@ -1240,7 +1281,11 @@ namespace vm
             }
             catch (Exception ex)
             {
-
+                //if (debug)
+                //{
+                //    Console.WriteLine(ex);
+                //    Console.ReadKey();
+                //}
             }
         }
     }
