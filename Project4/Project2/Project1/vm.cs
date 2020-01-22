@@ -565,7 +565,7 @@ namespace vm
                 byte[] op1Array = new byte[4];
                 byte[] op2Array = new byte[4];
                 bool breakPoint = false;
-                int activateBreakPoint = 0;
+                int whileCount = 0;
                 debug = false;
                 while (running)
                 {
@@ -622,14 +622,19 @@ namespace vm
                         }
                         if(breakPoint)
                         {
-                            debug = true;
+                            if (whileCount == 0)
+                            {
+                                debug = true;
+                            }
+                            whileCount++;
                             breakPoint = false;
-                            activateBreakPoint = 1;
                         }
-                        bool tryThis = false;
-                        if(tryThis)
+                        if(RT[0] == 99968 || RT[1] == 99968 || RT[2] == 99968 || RT[3] == 99968 || RT[4] == 99968 || RT[5] == 99968 || RT[6] == 99968)
                         {
-                            debug = false;
+                            if (whileCount == 3)
+                            {
+                                debug = true;
+                            }
                         }
 
                         switch (opCode)
